@@ -1,0 +1,23 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: liveklass-mariadb
+    environment:
+      TZ: Asia/Seoul # G-3 전 구간 KST
+      MARIADB_DATABASE: liveklass
+      MARIADB_USER: liveklass
+      MARIADB_PASSWORD: liveklass
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "13306:3306" # 호스트 로컬 MySQL(3306)과 충돌 방지
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7
+    container_name: liveklass-redis
+    ports:
+      - "16379:6379" # 호스트 로컬 Redis(6379)와 충돌 방지
