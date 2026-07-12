@@ -24,3 +24,11 @@ liveklass:
   waitlist:
     payment-due-hours: 24 # A-6: 승격 결제 기한
     expiry-check-delay: 60s # 승격 기한 만료 잡 폴링 간격
+  notification:
+    retry:
+      max-count: 3 # C-3: 임계 도달 시 DEAD (총 시도 3회)
+      interval: 5m # C-3: 재시도 간격
+    processing-timeout: 3m # C-4: 재시도 간격보다 짧게 유지
+    batch-size: 100
+    send-poll-delay: 10s
+    recovery-poll-delay: 60s
