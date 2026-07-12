@@ -17,3 +17,10 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+liveklass:
+  enrollment:
+    cancel-period-days: 7 # A-4: CONFIRMED 취소 기한
+  waitlist:
+    payment-due-hours: 24 # A-6: 승격 결제 기한
+    expiry-check-delay: 60s # 승격 기한 만료 잡 폴링 간격

@@ -20,6 +20,10 @@ public enum ErrorCode {
 	INVALID_STATE_TRANSITION(HttpStatus.CONFLICT, "허용되지 않는 상태 전이입니다."),
 	DUPLICATE_ACTIVE_ENROLLMENT(HttpStatus.CONFLICT, "이미 신청한 강의입니다."),
 	CANCEL_PERIOD_EXPIRED(HttpStatus.CONFLICT, "취소 가능 기간이 지났습니다."),
+	COURSE_NOT_OPEN(HttpStatus.CONFLICT, "신청할 수 없는 강의 상태입니다."),
+	PAYMENT_DUE_EXPIRED(HttpStatus.CONFLICT, "결제 기한이 지났습니다."),
+	NOT_WAITLISTED(HttpStatus.CONFLICT, "대기 중인 신청이 아닙니다."),
+	CAPACITY_LESS_THAN_CONFIRMED(HttpStatus.CONFLICT, "정원은 확정 인원보다 작을 수 없습니다."),
 
 	// 과제 B — 정산 (phase-2)
 	REFUND_EXCEEDS_SALE_AMOUNT(HttpStatus.CONFLICT, "누적 환불액이 결제 금액을 초과합니다."),

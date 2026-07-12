@@ -5,10 +5,10 @@
     { "id": "creator-3", "name": "박강사" }
   ],
   "courses": [
-    { "id": "course-1", "creatorId": "creator-1", "title": "Spring Boot 입문" },
-    { "id": "course-2", "creatorId": "creator-1", "title": "JPA 실전" },
-    { "id": "course-3", "creatorId": "creator-2", "title": "Kotlin 기초" },
-    { "id": "course-4", "creatorId": "creator-3", "title": "MSA 설계" }
+    { "id": "course-1", "creatorId": "creator-1", "title": "Spring Boot 입문", "price": 50000, "capacity": 10, "status": "OPEN" },
+    { "id": "course-2", "creatorId": "creator-1", "title": "JPA 실전", "price": 80000, "capacity": 10, "status": "OPEN" },
+    { "id": "course-3", "creatorId": "creator-2", "title": "Kotlin 기초", "price": 60000, "capacity": 10, "status": "OPEN" },
+    { "_comment": "capacity 2 — waitlist 시연용", "id": "course-4", "creatorId": "creator-3", "title": "MSA 설계", "price": 120000, "capacity": 2, "status": "OPEN" }
   ],
   "saleRecords": [
     {

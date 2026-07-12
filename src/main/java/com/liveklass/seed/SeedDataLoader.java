@@ -2,6 +2,9 @@ package com.liveklass.seed;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.liveklass.course.Course;
+import com.liveklass.course.CourseRepository;
+import com.liveklass.course.CourseStatus;
 import com.liveklass.user.Role;
 import com.liveklass.user.User;
 import com.liveklass.user.UserRepository;
@@ -27,6 +30,7 @@ import java.util.TreeSet;
 public class SeedDataLoader implements ApplicationRunner {
 
 	private final UserRepository userRepository;
+	private final CourseRepository courseRepository;
 	private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 	private final ObjectMapper objectMapper;
 
@@ -47,10 +51,28 @@ public class SeedDataLoader implements ApplicationRunner {
 		}
 		studentIds.forEach(id -> saveUserIfAbsent(id, "수강생-" + id, Role.STUDENT));
 
-		// TODO phase-1: courses 시드 (COURSE 엔티티 생성 후)
+		for (JsonNode course : root.get("courses")) {
+			saveCourseIfAbsent(course);
+		}
+
 		// TODO phase-2: saleRecords 시드 (SALE_RECORD 엔티티 생성 후)
 
-		log.info("시드 완료: users={}", userRepository.count());
+		log.info("시드 완료: users={}, courses={}", userRepository.count(), courseRepository.count());
+	}
+
+	private void saveCourseIfAbsent(JsonNode node) {
+		String id = node.get("id").asText();
+		if (courseRepository.existsById(id)) {
+			return;
+		}
+		courseRepository.save(Course.builder()
+				.id(id)
+				.creatorId(node.get("creatorId").asText())
+				.title(node.get("title").asText())
+				.price(node.get("price").asInt())
+				.capacity(node.get("capacity").asInt())
+				.status(CourseStatus.valueOf(node.get("status").asText()))
+				.build());
 	}
 
 	private void saveUserIfAbsent(String id, String name, Role role) {

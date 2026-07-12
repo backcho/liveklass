@@ -2,3 +2,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+liveklass:
+  scheduling:
+    enabled: false # 테스트는 잡 메서드를 직접 호출 — 백그라운드 실행과의 간섭 방지
