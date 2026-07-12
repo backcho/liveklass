@@ -10,6 +10,9 @@
     { "id": "course-3", "creatorId": "creator-2", "title": "Kotlin 기초", "price": 60000, "capacity": 10, "status": "OPEN" },
     { "_comment": "capacity 2 — waitlist 시연용", "id": "course-4", "creatorId": "creator-3", "title": "MSA 설계", "price": 120000, "capacity": 2, "status": "OPEN" }
   ],
+  "commissionRates": [
+    { "_comment": "전체 기본 요율 20% — 과제 고정값 (B-3a)", "id": "rate-default", "creatorId": null, "rate": 20.0, "startedAt": "2020-01-01", "endedAt": null }
+  ],
   "saleRecords": [
     {
       "_comment": "케이스 1 — 정상 판매 (취소 없음)",
@@ -66,6 +69,29 @@
       "studentId": "student-7",
       "amount": 120000,
       "paidAt": "2025-02-14T10:00:00+09:00"
+    }
+  ],
+  "cancelRecords": [
+    {
+      "_comment": "케이스 3 — sale-3 전액 환불 (원문 시나리오 표의 cancel-1)",
+      "id": "cancel-1",
+      "saleRecordId": "sale-3",
+      "refundAmount": 80000,
+      "cancelledAt": "2025-03-21T10:00:00+09:00"
+    },
+    {
+      "_comment": "케이스 4 — sale-4 부분 환불 (cancel-2)",
+      "id": "cancel-2",
+      "saleRecordId": "sale-4",
+      "refundAmount": 30000,
+      "cancelledAt": "2025-03-25T15:00:00+09:00"
+    },
+    {
+      "_comment": "케이스 5 — 월 경계: 1월 판매(sale-5)의 2월 초 취소 (cancel-3)",
+      "id": "cancel-3",
+      "saleRecordId": "sale-5",
+      "refundAmount": 60000,
+      "cancelledAt": "2025-02-01T00:30:00+09:00"
     }
   ]
 }

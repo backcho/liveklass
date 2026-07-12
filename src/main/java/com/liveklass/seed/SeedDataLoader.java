@@ -1,27 +1,14 @@
 package com.liveklass.seed;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.liveklass.course.Course;
-import com.liveklass.course.CourseRepository;
-import com.liveklass.course.CourseStatus;
-import com.liveklass.user.Role;
-import com.liveklass.user.User;
-import com.liveklass.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.TreeSet;
 
 /**
- * G-5: 과제 샘플 데이터 시드 (local 프로파일 전용).
- * 시드 사용자 비밀번호 규칙: {id}! (예: creator-1!)
+ * G-5: 앱 시작 시 샘플 데이터 시드 (local 프로파일 전용). 실제 주입은 SeedDataImporter.
  */
 @Slf4j
 @Component
@@ -29,62 +16,11 @@ import java.util.TreeSet;
 @RequiredArgsConstructor
 public class SeedDataLoader implements ApplicationRunner {
 
-	private final UserRepository userRepository;
-	private final CourseRepository courseRepository;
-	private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-	private final ObjectMapper objectMapper;
+	private final SeedDataImporter seedDataImporter;
 
 	@Override
-	@Transactional
-	public void run(ApplicationArguments args) throws Exception {
-		JsonNode root = objectMapper.readTree(new ClassPathResource("seed/sample-data.json").getInputStream());
-
-		saveUserIfAbsent("admin-1", "운영자", Role.ADMIN);
-
-		for (JsonNode creator : root.get("creators")) {
-			saveUserIfAbsent(creator.get("id").asText(), creator.get("name").asText(), Role.CREATOR);
-		}
-
-		TreeSet<String> studentIds = new TreeSet<>();
-		for (JsonNode sale : root.get("saleRecords")) {
-			studentIds.add(sale.get("studentId").asText());
-		}
-		studentIds.forEach(id -> saveUserIfAbsent(id, "수강생-" + id, Role.STUDENT));
-
-		for (JsonNode course : root.get("courses")) {
-			saveCourseIfAbsent(course);
-		}
-
-		// TODO phase-2: saleRecords 시드 (SALE_RECORD 엔티티 생성 후)
-
-		log.info("시드 완료: users={}, courses={}", userRepository.count(), courseRepository.count());
-	}
-
-	private void saveCourseIfAbsent(JsonNode node) {
-		String id = node.get("id").asText();
-		if (courseRepository.existsById(id)) {
-			return;
-		}
-		courseRepository.save(Course.builder()
-				.id(id)
-				.creatorId(node.get("creatorId").asText())
-				.title(node.get("title").asText())
-				.price(node.get("price").asInt())
-				.capacity(node.get("capacity").asInt())
-				.status(CourseStatus.valueOf(node.get("status").asText()))
-				.build());
-	}
-
-	private void saveUserIfAbsent(String id, String name, Role role) {
-		if (userRepository.existsById(id)) {
-			return;
-		}
-		userRepository.save(User.builder()
-				.id(id)
-				.name(name)
-				.email(id + "@liveklass.local")
-				.password(passwordEncoder.encode(id + "!"))
-				.role(role)
-				.build());
+	public void run(ApplicationArguments args) {
+		seedDataImporter.importAll();
+		log.info("시드 완료 (seed/sample-data.json)");
 	}
 }
