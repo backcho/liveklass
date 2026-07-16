@@ -15,9 +15,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+    volumes:
+      - mariadb_data:/var/lib/mysql
 
-  redis:
-    image: redis:7
-    container_name: liveklass-redis
-    ports:
-      - "16379:6379" # 호스트 로컬 Redis(6379)와 충돌 방지
+volumes:
+  mariadb_data:

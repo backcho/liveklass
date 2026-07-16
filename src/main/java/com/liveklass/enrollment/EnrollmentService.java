@@ -1,5 +1,6 @@
 package com.liveklass.enrollment;
 
+import com.liveklass.auth.AuthUser;
 import com.liveklass.common.dto.PageResponse;
 import com.liveklass.common.error.BusinessException;
 import com.liveklass.common.error.ErrorCode;
@@ -12,6 +13,7 @@ import com.liveklass.enrollment.event.EnrollmentAppliedEvent;
 import com.liveklass.enrollment.event.EnrollmentCancelledEvent;
 import com.liveklass.enrollment.event.EnrollmentConfirmedEvent;
 import com.liveklass.enrollment.event.WaitlistPromotedEvent;
+import com.liveklass.user.Role;
 import com.liveklass.user.User;
 import com.liveklass.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,6 @@ public class EnrollmentService {
 	private final EnrollmentRepository enrollmentRepository;
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
-	private final WaitlistCacheService waitlistCacheService;
 	private final ApplicationEventPublisher eventPublisher;
 	private final EnrollmentProperties enrollmentProperties;
 	private final WaitlistProperties waitlistProperties;
@@ -158,9 +159,24 @@ public class EnrollmentService {
 		if (enrollment.getStatus() != EnrollmentStatus.WAITLISTED) {
 			throw new BusinessException(ErrorCode.NOT_WAITLISTED);
 		}
-		long position = waitlistCacheService.position(enrollment);
-		long waitingCount = waitlistCacheService.waitingCount(enrollment.getCourseId());
+		long position = enrollmentRepository.countWaitlistPosition(
+				enrollment.getCourseId(), enrollment.getAppliedAt(), enrollment.getId());
+		long waitingCount = enrollmentRepository.countByCourseIdAndStatus(
+				enrollment.getCourseId(), EnrollmentStatus.WAITLISTED);
 		return new WaitlistPositionResponse(enrollment.getId(), enrollment.getCourseId(), position, waitingCount);
+	}
+
+	/** 신청 상세 — 본인 또는 ADMIN */
+	@Transactional(readOnly = true)
+	public EnrollmentResponse detail(AuthUser requester, String enrollmentId) {
+		Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+				.orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "신청을 찾을 수 없습니다: " + enrollmentId));
+		if (requester.getRole() != Role.ADMIN && !enrollment.getStudentId().equals(requester.getId())) {
+			throw new BusinessException(ErrorCode.FORBIDDEN, "본인 신청만 조회할 수 있습니다.");
+		}
+		String courseTitle = courseRepository.findById(enrollment.getCourseId())
+				.map(Course::getTitle).orElse(null);
+		return EnrollmentResponse.of(enrollment, courseTitle, null);
 	}
 
 	@Transactional(readOnly = true)
@@ -175,13 +191,13 @@ public class EnrollmentService {
 		return PageResponse.of(page, e -> EnrollmentResponse.of(e, titles.get(e.getCourseId()), null));
 	}
 
-	/** 크리에이터 전용 — 본인 강의의 수강 신청 목록 */
+	/** 수강생 목록 — 본인 강의 CREATOR 또는 ADMIN (A-5b) */
 	@Transactional(readOnly = true)
-	public PageResponse<EnrollmentResponse> courseEnrollments(String creatorId, String courseId,
+	public PageResponse<EnrollmentResponse> courseEnrollments(AuthUser requester, String courseId,
 			EnrollmentStatus status, Pageable pageable) {
 		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "강의를 찾을 수 없습니다: " + courseId));
-		if (!course.getCreatorId().equals(creatorId)) {
+		if (requester.getRole() != Role.ADMIN && !course.getCreatorId().equals(requester.getId())) {
 			throw new BusinessException(ErrorCode.FORBIDDEN, "본인 강의만 조회할 수 있습니다.");
 		}
 		Page<Enrollment> page = status != null

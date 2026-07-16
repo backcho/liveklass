@@ -2,13 +2,27 @@
   "creators": [
     { "id": "creator-1", "name": "김강사" },
     { "id": "creator-2", "name": "이강사" },
-    { "id": "creator-3", "name": "박강사" }
+    { "id": "creator-3", "name": "박강사" },
+    { "id": "creator-4", "name": "최강사" },
+    { "id": "creator-5", "name": "정강사" },
+    { "id": "creator-6", "name": "강강사" },
+    { "id": "creator-7", "name": "조강사" },
+    { "id": "creator-8", "name": "윤강사" },
+    { "id": "creator-9", "name": "장강사" },
+    { "id": "creator-10", "name": "임강사" }
+  ],
+  "students": [
+    "student-1", "student-2", "student-3", "student-4", "student-5",
+    "student-6", "student-7", "student-8", "student-9", "student-10",
+    "student-11", "student-12", "student-13", "student-14", "student-15",
+    "student-16", "student-17", "student-18", "student-19", "student-20"
   ],
   "courses": [
     { "id": "course-1", "creatorId": "creator-1", "title": "Spring Boot 입문", "price": 50000, "capacity": 10, "status": "OPEN" },
     { "id": "course-2", "creatorId": "creator-1", "title": "JPA 실전", "price": 80000, "capacity": 10, "status": "OPEN" },
     { "id": "course-3", "creatorId": "creator-2", "title": "Kotlin 기초", "price": 60000, "capacity": 10, "status": "OPEN" },
-    { "_comment": "capacity 2 — waitlist 시연용", "id": "course-4", "creatorId": "creator-3", "title": "MSA 설계", "price": 120000, "capacity": 2, "status": "OPEN" }
+    { "_comment": "capacity 10 — 대기열 시연용. 신청 15명 = 확정 10(정원 도달, 자동 CLOSED) + 대기 5", "id": "course-4", "creatorId": "creator-3", "title": "MSA 설계", "price": 120000, "capacity": 10, "status": "OPEN" },
+    { "_comment": "정원 이상 신청 허용 시연용. 신청 12명(정원 초과) 중 결제 확정은 6명뿐(정원 미달, OPEN 유지) — 신청(PENDING)은 정원을 점유하지 않음을 보여준다 (A-1)", "id": "course-5", "creatorId": "creator-4", "title": "클라우드 아키텍처", "price": 90000, "capacity": 10, "status": "OPEN" }
   ],
   "commissionRates": [
     { "_comment": "전체 기본 요율 20% — 과제 고정값 (B-3a)", "id": "rate-default", "creatorId": null, "rate": 20.0, "startedAt": "2020-01-01", "endedAt": null }
@@ -93,5 +107,35 @@
       "refundAmount": 60000,
       "cancelledAt": "2025-02-01T00:30:00+09:00"
     }
+  ],
+  "enrollments": [
+    { "_comment": "course-4: 확정 10명 — 정원(10) 도달, increaseConfirmed()가 자동으로 CLOSED 전환", "courseId": "course-4", "studentId": "student-1", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:00:00+09:00", "confirmedAt": "2025-04-01T09:05:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-2", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:01:00+09:00", "confirmedAt": "2025-04-01T09:06:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-3", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:02:00+09:00", "confirmedAt": "2025-04-01T09:07:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-4", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:03:00+09:00", "confirmedAt": "2025-04-01T09:08:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-5", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:04:00+09:00", "confirmedAt": "2025-04-01T09:09:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-6", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:05:00+09:00", "confirmedAt": "2025-04-01T09:10:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-7", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:06:00+09:00", "confirmedAt": "2025-04-01T09:11:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-8", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:07:00+09:00", "confirmedAt": "2025-04-01T09:12:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-9", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:08:00+09:00", "confirmedAt": "2025-04-01T09:13:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-10", "status": "CONFIRMED", "appliedAt": "2025-04-01T09:09:00+09:00", "confirmedAt": "2025-04-01T09:14:00+09:00" },
+    { "_comment": "course-4: 만석 이후 신청 5명 — 대기열 편입(WAITLISTED), applied_at 순으로 대기 순번 1~5", "courseId": "course-4", "studentId": "student-11", "status": "WAITLISTED", "appliedAt": "2025-04-01T10:00:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-12", "status": "WAITLISTED", "appliedAt": "2025-04-01T10:01:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-13", "status": "WAITLISTED", "appliedAt": "2025-04-01T10:02:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-14", "status": "WAITLISTED", "appliedAt": "2025-04-01T10:03:00+09:00" },
+    { "courseId": "course-4", "studentId": "student-15", "status": "WAITLISTED", "appliedAt": "2025-04-01T10:04:00+09:00" },
+
+    { "_comment": "course-5: 결제 확정 6명 — 정원(10) 미달이라 상태는 계속 OPEN", "courseId": "course-5", "studentId": "student-1", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:00:00+09:00", "confirmedAt": "2025-04-05T09:05:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-2", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:01:00+09:00", "confirmedAt": "2025-04-05T09:06:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-3", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:02:00+09:00", "confirmedAt": "2025-04-05T09:07:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-4", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:03:00+09:00", "confirmedAt": "2025-04-05T09:08:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-5", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:04:00+09:00", "confirmedAt": "2025-04-05T09:09:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-6", "status": "CONFIRMED", "appliedAt": "2025-04-05T09:05:00+09:00", "confirmedAt": "2025-04-05T09:10:00+09:00" },
+    { "_comment": "course-5: 결제 미확정 6명 — 정원 미달 상태라 대기열이 아닌 PENDING으로 남음(정원 초과 신청 자체는 허용, A-1)", "courseId": "course-5", "studentId": "student-7", "status": "PENDING", "appliedAt": "2025-04-05T10:00:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-8", "status": "PENDING", "appliedAt": "2025-04-05T10:01:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-9", "status": "PENDING", "appliedAt": "2025-04-05T10:02:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-10", "status": "PENDING", "appliedAt": "2025-04-05T10:03:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-11", "status": "PENDING", "appliedAt": "2025-04-05T10:04:00+09:00" },
+    { "courseId": "course-5", "studentId": "student-12", "status": "PENDING", "appliedAt": "2025-04-05T10:05:00+09:00" }
   ]
 }

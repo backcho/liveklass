@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -104,6 +105,37 @@ public class SaleService {
 				.refundAmount(refundAmount)
 				.cancelledAt(cancelledAt)
 				.build());
+	}
+
+	/** 운영자 판매 관리 — 전체 판매 목록 (기간 필터) */
+	@Transactional(readOnly = true)
+	public PageResponse<SaleRecordResponse> allSales(LocalDateTime from, LocalDateTime to, Pageable pageable) {
+		Page<SaleRecord> page = saleRecordRepository.pageByPeriod(
+				from != null ? from : MIN, to != null ? to : MAX, pageable);
+		Map<String, String> titles = courseRepository
+				.findAllById(page.getContent().stream().map(SaleRecord::getCourseId).distinct().toList())
+				.stream().collect(Collectors.toMap(Course::getId, Course::getTitle));
+		return PageResponse.of(page, s -> SaleRecordResponse.of(s, titles.get(s.getCourseId())));
+	}
+
+	/** 운영자 판매 관리 — 판매 상세 */
+	@Transactional(readOnly = true)
+	public SaleRecordResponse getSale(String saleRecordId) {
+		SaleRecord sale = saleRecordRepository.findById(saleRecordId)
+				.orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND,
+						"판매 내역을 찾을 수 없습니다: " + saleRecordId));
+		String title = courseRepository.findById(sale.getCourseId()).map(Course::getTitle).orElse(null);
+		return SaleRecordResponse.of(sale, title);
+	}
+
+	/** 운영자 판매 관리 — 판매 건의 취소/환불 이력 */
+	@Transactional(readOnly = true)
+	public List<CancelRecordResponse> cancelsOfSale(String saleRecordId) {
+		if (!saleRecordRepository.existsById(saleRecordId)) {
+			throw new BusinessException(ErrorCode.NOT_FOUND, "판매 내역을 찾을 수 없습니다: " + saleRecordId);
+		}
+		return cancelRecordRepository.findBySaleRecordIdOrderByCancelledAtAsc(saleRecordId)
+				.stream().map(CancelRecordResponse::from).toList();
 	}
 
 	/** 내 강의 판매 목록 (CREATOR, 기간 필터) */

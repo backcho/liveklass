@@ -128,6 +128,12 @@ public class SettlementService {
 		return SettlementResponse.from(settlement);
 	}
 
+	/** 운영자 정산 관리 — 전체 정산 확정 이력 */
+	@Transactional(readOnly = true)
+	public PageResponse<SettlementResponse> allSettlements(Pageable pageable) {
+		return PageResponse.of(settlementRepository.findAll(pageable), SettlementResponse::from);
+	}
+
 	/** 내 정산 목록 — 확정된 과거 이력 (CREATOR) */
 	@Transactional(readOnly = true)
 	public PageResponse<SettlementResponse> mySettlements(String creatorId, Pageable pageable) {

@@ -29,10 +29,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, String> 
 	Optional<Enrollment> findFirstByCourseIdAndStatusOrderByAppliedAtAscIdAsc(String courseId,
 			EnrollmentStatus status);
 
-	// A-6: Redis ZSET 유실 시 재구축용 전체 대기열
+	// A-6: 대기열 전체 순서 조회(승격 순서 확인 등)
 	List<Enrollment> findByCourseIdAndStatusOrderByAppliedAtAscIdAsc(String courseId, EnrollmentStatus status);
 
-	// A-6: 캐시 불능 시 DB로 순번 계산 (자신 포함 앞선 대기 수 = 1-base 순번)
+	// A-6: 대기 순번 조회 — 자신 포함 앞선 대기 수 = 1-base 순번
 	@Query("""
 			select count(e) from Enrollment e
 			where e.courseId = :courseId and e.status = com.liveklass.enrollment.EnrollmentStatus.WAITLISTED

@@ -5,9 +5,5 @@ spring:
     password: liveklass
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none # 스키마 변경은 'make migrate'로만 — generated column(active_flag)은 validate로 자체 검증 불가해 none 사용
     show-sql: true
-  data:
-    redis:
-      host: localhost
-      port: 16379

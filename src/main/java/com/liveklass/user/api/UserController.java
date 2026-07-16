@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "User", description = "사용자")
+@Tag(name = "4. User", description = "사용자")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

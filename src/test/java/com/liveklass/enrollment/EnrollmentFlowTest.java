@@ -68,7 +68,7 @@ class EnrollmentFlowTest {
 
 		// 여석 있는 수동 CLOSED도 거부 (A-5a)
 		String closedId = openCourse(10);
-		courseService.changeStatus(CREATOR, closedId, CourseStatus.CLOSED);
+		courseService.changeStatus(closedId, CourseStatus.CLOSED);
 		assertErrorCode(() -> enrollmentService.apply("flow-s2", closedId), ErrorCode.COURSE_NOT_OPEN);
 	}
 
@@ -170,7 +170,7 @@ class EnrollmentFlowTest {
 	private String openCourse(int capacity) {
 		String id = courseService.create(CREATOR,
 				new CourseCreateRequest("흐름 테스트 강의", null, 10000, capacity, null, null)).id();
-		courseService.changeStatus(CREATOR, id, CourseStatus.OPEN);
+		courseService.changeStatus(id, CourseStatus.OPEN);
 		return id;
 	}
 

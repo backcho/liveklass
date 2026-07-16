@@ -47,7 +47,7 @@ class EnrollmentSaleIntegrationTest {
 		clock.reset();
 		courseId = courseService.create(CREATOR,
 				new CourseCreateRequest("자동 판매 강의", null, 45000, 10, null, null)).id();
-		courseService.changeStatus(CREATOR, courseId, CourseStatus.OPEN);
+		courseService.changeStatus(courseId, CourseStatus.OPEN);
 	}
 
 	@Test

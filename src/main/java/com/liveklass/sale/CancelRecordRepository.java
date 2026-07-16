@@ -14,6 +14,9 @@ public interface CancelRecordRepository extends JpaRepository<CancelRecord, Stri
 	@Query("select coalesce(sum(cr.refundAmount), 0) from CancelRecord cr where cr.saleRecordId = :saleRecordId")
 	long sumRefundBySaleRecordId(@Param("saleRecordId") String saleRecordId);
 
+	// 판매 상세의 취소/환불 이력
+	List<CancelRecord> findBySaleRecordIdOrderByCancelledAtAsc(String saleRecordId);
+
 	// 취소는 cancelled_at 기준 월 귀속 (G-3 KST, 월 경계 케이스)
 	@Query("""
 			select cr from CancelRecord cr, SaleRecord s, Course c

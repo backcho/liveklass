@@ -44,6 +44,9 @@ public interface NotificationRequestRepository extends JpaRepository<Notificatio
 			""")
 	List<NotificationRequest> findStuck(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
 
+	// 운영자 알림센터 목록 — 상태 필터
+	Page<NotificationRequest> findByStatus(NotificationStatus status, Pageable pageable);
+
 	Page<NotificationRequest> findByRecipientId(String recipientId, Pageable pageable);
 
 	Page<NotificationRequest> findByRecipientIdAndIsRead(String recipientId, boolean isRead, Pageable pageable);

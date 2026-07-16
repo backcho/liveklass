@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 // /api/admin/** 은 SecurityConfig에서 ADMIN 전용
-@Tag(name = "CommissionRate", description = "수수료율 관리 (운영자)")
+@Tag(name = "2-3. [과제B] CommissionRate", description = "수수료율 관리 (운영자)")
 @RestController
 @RequestMapping("/api/admin/commission-rates")
 @RequiredArgsConstructor
@@ -29,7 +29,9 @@ public class CommissionRateController {
 
 	private final CommissionRateService commissionRateService;
 
-	@Operation(summary = "수수료율 등록", description = "creatorId null이면 전체 기본 요율. 동일 대상 기간 겹침 거부 (B-3)")
+	@Operation(summary = "수수료율 등록",
+			description = "creatorId null이면 전체 기본 요율. 개별 크리에이터는 기간 겹침 거부, "
+					+ "전체 기본 요율은 겹치는 이전 요율을 신규 시작일 전날로 자동 마감 후 교체 (B-3c)")
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public CommissionRateResponse create(@AuthenticationPrincipal AuthUser authUser,

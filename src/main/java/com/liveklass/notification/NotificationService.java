@@ -71,6 +71,15 @@ public class NotificationService {
 		return PageResponse.of(page, NotificationResponse::from);
 	}
 
+	/** 운영자 알림센터 — 전체 알림 목록 (상태 필터) */
+	@Transactional(readOnly = true)
+	public PageResponse<NotificationResponse> adminList(NotificationStatus status, Pageable pageable) {
+		Page<NotificationRequest> page = status != null
+				? repository.findByStatus(status, pageable)
+				: repository.findAll(pageable);
+		return PageResponse.of(page, NotificationResponse::from);
+	}
+
 	/** 읽음 처리 — 멱등 (여러 기기 동시 요청도 동일 결과) */
 	@Transactional
 	public NotificationResponse markRead(String recipientId, String id) {

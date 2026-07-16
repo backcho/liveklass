@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>LiveKlass 로컬 콘솔</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<section id="login-view" class="hidden">
+	<div class="login-card">
+		<h1>LiveKlass <span class="muted">로컬 콘솔</span></h1>
+		<p class="muted">과제 API 확인용 화면 — HTTP Basic 자격증명은 이 탭(sessionStorage)에만 보관됩니다.</p>
+		<form id="login-form">
+			<label>이메일 <input type="email" id="login-email" placeholder="student-1@liveklass.local" required></label>
+			<label>비밀번호 <input type="password" id="login-password" placeholder="student-1!" required></label>
+			<button type="submit" class="btn primary wide">로그인</button>
+		</form>
+		<div id="login-error" class="error hidden"></div>
+		<div class="quick-login">
+			<span class="muted">시드 계정 (비밀번호 자동 입력):</span>
+			<div id="quick-accounts"></div>
+		</div>
+	</div>
+</section>
+
+<!-- 앱 셸 -->
+<section id="app-view" class="hidden">
+	<header>
+		<span class="brand">LiveKlass</span>
+		<span class="spacer"></span>
+		<span id="me-info"></span>
+		<button id="logout-btn" class="btn small">로그아웃</button>
+	</header>
+	<div class="body">
+		<nav id="side-menu"></nav>
+		<main id="content"></main>
+	</div>
+</section>
+
+<div id="toast" class="hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

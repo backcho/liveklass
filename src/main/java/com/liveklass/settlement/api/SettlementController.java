@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@Tag(name = "Settlement", description = "정산")
+@Tag(name = "2-2. [과제B] Settlement", description = "정산")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -53,6 +53,14 @@ public class SettlementController {
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
 		return settlementService.aggregate(from, to);
+	}
+
+	@Operation(summary = "정산 목록 (운영자)", description = "전체 크리에이터의 정산 확정 이력")
+	@GetMapping("/admin/settlements")
+	public PageResponse<SettlementResponse> allSettlements(
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+		return settlementService.allSettlements(
+				PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
 	}
 
 	@Operation(summary = "정산 확정(생성)",

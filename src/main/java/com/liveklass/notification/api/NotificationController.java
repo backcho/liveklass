@@ -3,6 +3,7 @@ package com.liveklass.notification.api;
 import com.liveklass.auth.AuthUser;
 import com.liveklass.common.dto.PageResponse;
 import com.liveklass.notification.NotificationService;
+import com.liveklass.notification.NotificationStatus;
 import com.liveklass.notification.dto.NotificationCreateRequest;
 import com.liveklass.notification.dto.NotificationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Notification", description = "알림 발송")
+@Tag(name = "3-1. [과제C] Notification", description = "알림 발송")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -60,6 +61,15 @@ public class NotificationController {
 	public NotificationResponse markRead(@AuthenticationPrincipal AuthUser authUser,
 			@PathVariable String notificationId) {
 		return notificationService.markRead(authUser.getId(), notificationId);
+	}
+
+	@Operation(summary = "알림센터 목록 (운영자)", description = "전체 알림 요청, 상태 필터 (DEAD 조회 등)")
+	@GetMapping("/admin/notifications")
+	public PageResponse<NotificationResponse> adminList(
+			@RequestParam(required = false) NotificationStatus status,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+		return notificationService.adminList(status,
+				PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
 	}
 
 	@Operation(summary = "알림 수동 재시도", description = "운영자 전용 — DEAD 대상, retry_count 초기화 (C-7)")

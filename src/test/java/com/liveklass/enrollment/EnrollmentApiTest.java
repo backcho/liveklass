@@ -34,6 +34,7 @@ class EnrollmentApiTest {
 
 	private static final String CREATOR_EMAIL = "api-creator@liveklass.local";
 	private static final String STUDENT_EMAIL = "api-student@liveklass.local";
+	private static final String ADMIN_EMAIL = "api-admin@liveklass.local";
 	private static final String PASSWORD = "test!";
 
 	@Autowired
@@ -52,6 +53,7 @@ class EnrollmentApiTest {
 	void setUp() {
 		saveUserIfAbsent("api-creator", CREATOR_EMAIL, Role.CREATOR);
 		saveUserIfAbsent("api-student", STUDENT_EMAIL, Role.STUDENT);
+		saveUserIfAbsent("api-admin", ADMIN_EMAIL, Role.ADMIN);
 	}
 
 	@Test
@@ -67,8 +69,9 @@ class EnrollmentApiTest {
 				.andReturn().getResponse().getContentAsString();
 		String courseId = objectMapper.readTree(courseJson).get("id").asText();
 
+		// A-5b: 상태 변경(오픈)은 ADMIN 전용
 		mockMvc.perform(post("/api/courses/{id}/status", courseId)
-						.with(httpBasic(CREATOR_EMAIL, PASSWORD))
+						.with(httpBasic(ADMIN_EMAIL, PASSWORD))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"status\":\"OPEN\"}"))
 				.andExpect(status().isOk())
@@ -116,6 +119,14 @@ class EnrollmentApiTest {
 
 		// CREATOR가 수강 신청 시도
 		mockMvc.perform(post("/api/courses/any/enrollments").with(httpBasic(CREATOR_EMAIL, PASSWORD)))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.code").value("FORBIDDEN"));
+
+		// CREATOR가 강의 상태 변경 시도 — ADMIN 전용 (A-5b)
+		mockMvc.perform(post("/api/courses/any/status")
+						.with(httpBasic(CREATOR_EMAIL, PASSWORD))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"status\":\"OPEN\"}"))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.code").value("FORBIDDEN"));
 	}

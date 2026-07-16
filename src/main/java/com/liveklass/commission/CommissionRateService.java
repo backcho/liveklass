@@ -41,8 +41,19 @@ public class CommissionRateService {
 		if (end.isBefore(request.startedAt())) {
 			throw new BusinessException(ErrorCode.INVALID_REQUEST, "마감일이 시작일보다 빠를 수 없습니다.");
 		}
-		// B-3: 동일 대상 기간 겹침은 등록 시 거부
-		if (commissionRateRepository.existsOverlap(request.creatorId(), request.startedAt(), end)) {
+		if (request.creatorId() == null) {
+			// B-3c: 전체 기본 요율 갱신 — 겹치는 이전 기본 요율은 거부 대신 새 요율 시작일 전날로 자동 마감.
+			// 이미 시작된(과거) 요율만 자동 마감 대상이며, 아직 시작 전인 미래 요율과 겹치면 모호하므로 그대로 거부한다.
+			List<CommissionRate> overlapping = commissionRateRepository
+					.findOverlappingDefault(request.startedAt(), end);
+			boolean hasFutureConflict = overlapping.stream()
+					.anyMatch(r -> !r.getStartedAt().isBefore(request.startedAt()));
+			if (hasFutureConflict) {
+				throw new BusinessException(ErrorCode.COMMISSION_RATE_PERIOD_OVERLAP);
+			}
+			overlapping.forEach(r -> r.closeAt(request.startedAt().minusDays(1)));
+		} else if (commissionRateRepository.existsOverlap(request.creatorId(), request.startedAt(), end)) {
+			// B-3c: 개별 크리에이터 요율은 기간 겹침을 그대로 거부
 			throw new BusinessException(ErrorCode.COMMISSION_RATE_PERIOD_OVERLAP);
 		}
 		CommissionRate rate = CommissionRate.builder()

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
@@ -23,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * A-6: 대기열 편입 → 순번 조회(Redis 캐시 + DB 재구축) → 승격(결제 기한) → 기한 만료 자동 취소 → 다음 순번 승격.
+ * A-6: 대기열 편입 → 순번 조회(DB 쿼리) → 승격(결제 기한) → 기한 만료 자동 취소 → 다음 순번 승격.
  */
 @SpringBootTest
 @Import(IntegrationTestConfiguration.class)
@@ -48,9 +47,6 @@ class WaitlistFlowTest {
 	private WaitlistExpiryScheduler waitlistExpiryScheduler;
 
 	@Autowired
-	private StringRedisTemplate redisTemplate;
-
-	@Autowired
 	private MutableClock clock;
 
 	@BeforeEach
@@ -72,19 +68,6 @@ class WaitlistFlowTest {
 		assertThat(enrollmentService.waitlistPosition("wl-s2", w1.id()).position()).isEqualTo(1);
 		assertThat(enrollmentService.waitlistPosition("wl-s3", w2.id()).position()).isEqualTo(2);
 		assertThat(enrollmentService.waitlistPosition("wl-s3", w2.id()).waitingCount()).isEqualTo(2);
-	}
-
-	@Test
-	void 캐시가_유실돼도_DB에서_재구축해_순번을_반환한다() {
-		String courseId = fullCourse("wl-s4");
-		var w1 = enrollmentService.apply("wl-s5", courseId);
-		clock.plus(Duration.ofSeconds(10));
-		var w2 = enrollmentService.apply("wl-s6", courseId);
-
-		redisTemplate.delete("waitlist:course:" + courseId); // 캐시 유실 시뮬레이션
-
-		assertThat(enrollmentService.waitlistPosition("wl-s5", w1.id()).position()).isEqualTo(1);
-		assertThat(enrollmentService.waitlistPosition("wl-s6", w2.id()).position()).isEqualTo(2);
 	}
 
 	@Test
@@ -181,7 +164,7 @@ class WaitlistFlowTest {
 	private String openCourse(int capacity) {
 		String id = courseService.create(CREATOR,
 				new CourseCreateRequest("대기열 테스트 강의", null, 10000, capacity, null, null)).id();
-		courseService.changeStatus(CREATOR, id, CourseStatus.OPEN);
+		courseService.changeStatus(id, CourseStatus.OPEN);
 		return id;
 	}
 }

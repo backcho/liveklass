@@ -54,4 +54,9 @@ public class CommissionRate extends BaseTimeEntity {
 		this.startedAt = startedAt;
 		this.endedAt = endedAt;
 	}
+
+	// B-3: 신규 기본 요율 등록 시 겹치는 이전 기본 요율을 자동 마감
+	void closeAt(LocalDate date) {
+		this.endedAt = date;
+	}
 }

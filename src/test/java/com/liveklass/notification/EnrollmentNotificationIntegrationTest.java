@@ -46,7 +46,7 @@ class EnrollmentNotificationIntegrationTest {
 	void 신청_확정_취소_승격_이벤트가_알림_요청으로_적재된다() {
 		String courseId = courseService.create(CREATOR,
 				new CourseCreateRequest("알림 연동 강의", null, 10000, 1, null, null)).id();
-		courseService.changeStatus(CREATOR, courseId, CourseStatus.OPEN);
+		courseService.changeStatus(courseId, CourseStatus.OPEN);
 
 		// 신청 + 확정 (s1)
 		String e1 = enrollmentService.apply("noti-s1", courseId).id();

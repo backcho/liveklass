@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Enrollment", description = "수강 신청")
+@Tag(name = "1-2. [과제A] 수강 신청", description = "수강 신청")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -53,11 +53,18 @@ public class EnrollmentController {
 		return enrollmentService.cancel(authUser.getId(), enrollmentId);
 	}
 
-	@Operation(summary = "대기 순번 조회", description = "WAITLISTED 전용. Redis ZSET 캐시, 미스 시 DB 재구축 (A-6)")
+	@Operation(summary = "대기 순번 조회", description = "WAITLISTED 전용. DB 인덱스 쿼리로 순번 계산 (A-6)")
 	@GetMapping("/enrollments/{enrollmentId}/waitlist-position")
 	public WaitlistPositionResponse waitlistPosition(@AuthenticationPrincipal AuthUser authUser,
 			@PathVariable String enrollmentId) {
 		return enrollmentService.waitlistPosition(authUser.getId(), enrollmentId);
+	}
+
+	@Operation(summary = "신청 상세 조회", description = "본인 또는 ADMIN")
+	@GetMapping("/enrollments/{enrollmentId}")
+	public EnrollmentResponse detail(@AuthenticationPrincipal AuthUser authUser,
+			@PathVariable String enrollmentId) {
+		return enrollmentService.detail(authUser, enrollmentId);
 	}
 
 	@Operation(summary = "내 수강 신청 목록", description = "상태 필터 + 페이지네이션")
@@ -69,13 +76,13 @@ public class EnrollmentController {
 				PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "appliedAt")));
 	}
 
-	@Operation(summary = "내 강의 수강 신청 목록", description = "CREATOR 전용 — 본인 강의만")
+	@Operation(summary = "강의 수강생 목록", description = "본인 강의 CREATOR 또는 ADMIN (A-5b)")
 	@GetMapping("/courses/{courseId}/enrollments")
-	@PreAuthorize("hasRole('CREATOR')")
+	@PreAuthorize("hasAnyRole('CREATOR','ADMIN')")
 	public PageResponse<EnrollmentResponse> courseEnrollments(@AuthenticationPrincipal AuthUser authUser,
 			@PathVariable String courseId, @RequestParam(required = false) EnrollmentStatus status,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-		return enrollmentService.courseEnrollments(authUser.getId(), courseId, status,
+		return enrollmentService.courseEnrollments(authUser, courseId, status,
 				PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "appliedAt")));
 	}
 }

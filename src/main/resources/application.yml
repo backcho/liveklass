@@ -16,9 +16,13 @@ spring:
 
 springdoc:
   swagger-ui:
+    tags-sorter: alpha
     path: /swagger-ui.html
 
 liveklass:
+  migrate-only: false # 'make migrate' 전용 — true면 스키마만 맞추고 즉시 종료
+  seed:
+    enabled: false # 'make seed'에서만 true — 매 기동마다 재시딩되지 않도록
   enrollment:
     cancel-period-days: 7 # A-4: CONFIRMED 취소 기한
   waitlist:

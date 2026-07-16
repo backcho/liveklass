@@ -8,6 +8,9 @@ import com.liveklass.commission.CommissionRateService;
 import com.liveklass.course.Course;
 import com.liveklass.course.CourseRepository;
 import com.liveklass.course.CourseStatus;
+import com.liveklass.enrollment.Enrollment;
+import com.liveklass.enrollment.EnrollmentRepository;
+import com.liveklass.enrollment.EnrollmentStatus;
 import com.liveklass.sale.CancelRecord;
 import com.liveklass.sale.CancelRecordRepository;
 import com.liveklass.sale.SaleRecord;
@@ -26,7 +29,6 @@ import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.TreeSet;
 
 /**
  * G-5: seed/sample-data.json → 엔티티 주입 (멱등).
@@ -42,6 +44,7 @@ public class SeedDataImporter {
 	private final CommissionRateRepository commissionRateRepository;
 	private final SaleRecordRepository saleRecordRepository;
 	private final CancelRecordRepository cancelRecordRepository;
+	private final EnrollmentRepository enrollmentRepository;
 	private final CommissionRateService commissionRateService;
 	private final PasswordEncoder passwordEncoder;
 	private final ObjectMapper objectMapper;
@@ -54,11 +57,10 @@ public class SeedDataImporter {
 		for (JsonNode creator : root.get("creators")) {
 			saveUserIfAbsent(creator.get("id").asText(), creator.get("name").asText(), Role.CREATOR);
 		}
-		TreeSet<String> studentIds = new TreeSet<>();
-		for (JsonNode sale : root.get("saleRecords")) {
-			studentIds.add(sale.get("studentId").asText());
+		for (JsonNode student : root.get("students")) {
+			String id = student.asText();
+			saveUserIfAbsent(id, "수강생-" + id, Role.STUDENT);
 		}
-		studentIds.forEach(id -> saveUserIfAbsent(id, "수강생-" + id, Role.STUDENT));
 
 		for (JsonNode course : root.get("courses")) {
 			saveCourseIfAbsent(course);
@@ -71,6 +73,9 @@ public class SeedDataImporter {
 		}
 		for (JsonNode cancel : root.get("cancelRecords")) {
 			saveCancelIfAbsent(cancel);
+		}
+		for (JsonNode enrollment : root.get("enrollments")) {
+			saveEnrollmentIfAbsent(enrollment);
 		}
 	}
 
@@ -159,5 +164,27 @@ public class SeedDataImporter {
 	// 샘플의 +09:00 오프셋 표기 → KST LocalDateTime (G-3)
 	private LocalDateTime parseKst(String value) {
 		return OffsetDateTime.parse(value).toLocalDateTime();
+	}
+
+	// 대기열 시연용(course-4/5) 신청 데이터. id가 없으므로 (course, student) 활성 신청 존재 여부로 멱등 판정
+	private void saveEnrollmentIfAbsent(JsonNode node) {
+		String courseId = node.get("courseId").asText();
+		String studentId = node.get("studentId").asText();
+		if (enrollmentRepository.existsByCourseIdAndStudentIdAndStatusIn(
+				courseId, studentId, EnrollmentStatus.ACTIVE_STATUSES)) {
+			return;
+		}
+		EnrollmentStatus status = EnrollmentStatus.valueOf(node.get("status").asText());
+		LocalDateTime appliedAt = parseKst(node.get("appliedAt").asText());
+		Enrollment enrollment = status == EnrollmentStatus.WAITLISTED
+				? Enrollment.waitlisted(courseId, studentId, appliedAt)
+				: Enrollment.pending(courseId, studentId, appliedAt);
+		if (status == EnrollmentStatus.CONFIRMED) {
+			// A-3/A-5: 확정 인원 반영 — 정원 도달 시 course가 자동으로 CLOSED 전환
+			Course course = courseRepository.findById(courseId).orElseThrow();
+			course.increaseConfirmed();
+			enrollment.confirm(parseKst(node.get("confirmedAt").asText()));
+		}
+		enrollmentRepository.save(enrollment);
 	}
 }

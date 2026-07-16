@@ -141,7 +141,7 @@ class EnrollmentConcurrencyTest {
 	private String openCourse(int capacity) {
 		String id = courseService.create(CREATOR,
 				new CourseCreateRequest("동시성 테스트 강의", null, 10000, capacity, null, null)).id();
-		courseService.changeStatus(CREATOR, id, CourseStatus.OPEN);
+		courseService.changeStatus(id, CourseStatus.OPEN);
 		return id;
 	}
 

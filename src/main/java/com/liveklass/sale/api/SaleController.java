@@ -27,8 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Tag(name = "Sale", description = "판매·취소 내역")
+@Tag(name = "2-1. [과제B] Sale", description = "판매·취소 내역")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -49,6 +50,28 @@ public class SaleController {
 	public CancelRecordResponse registerCancel(@PathVariable String saleRecordId,
 			@Valid @RequestBody CancelCreateRequest request) {
 		return saleService.registerCancel(saleRecordId, request);
+	}
+
+	@Operation(summary = "판매 목록 (운영자)", description = "전체 판매 내역, 기간 필터(paid_at 기준)")
+	@GetMapping("/admin/sales")
+	public PageResponse<SaleRecordResponse> allSales(
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+		return saleService.allSales(from, to,
+				PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "paidAt")));
+	}
+
+	@Operation(summary = "판매 상세 (운영자)")
+	@GetMapping("/admin/sales/{saleRecordId}")
+	public SaleRecordResponse getSale(@PathVariable String saleRecordId) {
+		return saleService.getSale(saleRecordId);
+	}
+
+	@Operation(summary = "판매 건의 취소/환불 이력 (운영자)")
+	@GetMapping("/admin/sales/{saleRecordId}/cancels")
+	public List<CancelRecordResponse> cancelsOfSale(@PathVariable String saleRecordId) {
+		return saleService.cancelsOfSale(saleRecordId);
 	}
 
 	@Operation(summary = "내 강의 판매 목록", description = "CREATOR 전용, 기간 필터(paid_at 기준)")

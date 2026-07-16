@@ -37,6 +37,11 @@ public interface SaleRecordRepository extends JpaRepository<SaleRecord, String> 
 	Page<SaleRecord> pageByCreatorAndPeriod(@Param("creatorId") String creatorId,
 			@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
 
+	// 운영자 판매 관리 목록 — 전체 크리에이터, [from, to) 반개구간
+	@Query("select s from SaleRecord s where s.paidAt >= :from and s.paidAt < :to")
+	Page<SaleRecord> pageByPeriod(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to,
+			Pageable pageable);
+
 	// 운영자 집계: 기간 내 판매가 있는 크리에이터
 	@Query("""
 			select distinct c.creatorId from SaleRecord s, Course c

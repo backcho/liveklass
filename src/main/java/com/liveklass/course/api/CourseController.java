@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Course", description = "강의 관리")
+@Tag(name = "1-1. [과제A] Course", description = "강의 관리")
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
@@ -45,20 +45,20 @@ public class CourseController {
 		return courseService.create(authUser.getId(), request);
 	}
 
-	@Operation(summary = "강의 수정", description = "CREATOR 본인 강의만. 정원은 확정 인원 미만으로 줄일 수 없다.")
+	@Operation(summary = "[추가 기능] 강의 수정", description = "CREATOR 본인 강의 또는 ADMIN (A-5b). 정원은 확정 인원 미만으로 줄일 수 없다.")
 	@PutMapping("/{courseId}")
-	@PreAuthorize("hasRole('CREATOR')")
+	@PreAuthorize("hasAnyRole('CREATOR','ADMIN')")
 	public CourseResponse update(@AuthenticationPrincipal AuthUser authUser, @PathVariable String courseId,
-			@Valid @RequestBody CourseUpdateRequest request) {
-		return courseService.update(authUser.getId(), courseId, request);
+	                             @Valid @RequestBody CourseUpdateRequest request) {
+		return courseService.update(authUser, courseId, request);
 	}
 
-	@Operation(summary = "강의 상태 변경", description = "DRAFT→OPEN, OPEN→CLOSED, CLOSED→OPEN(재오픈)만 허용 (A-5)")
+	@Operation(summary = "강의 상태 변경", description = "ADMIN 전용 (A-5b) — 판매 개시·중단은 플랫폼 통제 영역. DRAFT→OPEN, OPEN→CLOSED, CLOSED→OPEN(재오픈)만 허용 (A-5)")
 	@PostMapping("/{courseId}/status")
-	@PreAuthorize("hasRole('CREATOR')")
-	public CourseResponse changeStatus(@AuthenticationPrincipal AuthUser authUser, @PathVariable String courseId,
+	@PreAuthorize("hasRole('ADMIN')")
+	public CourseResponse changeStatus(@PathVariable String courseId,
 			@Valid @RequestBody CourseStatusChangeRequest request) {
-		return courseService.changeStatus(authUser.getId(), courseId, request.status());
+		return courseService.changeStatus(courseId, request.status());
 	}
 
 	@Operation(summary = "강의 목록 조회", description = "상태 필터 + 페이지네이션")

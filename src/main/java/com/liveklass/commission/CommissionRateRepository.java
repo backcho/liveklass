@@ -26,6 +26,14 @@ public interface CommissionRateRepository extends JpaRepository<CommissionRate, 
 	boolean existsOverlap(@Param("creatorId") String creatorId,
 			@Param("newStart") LocalDate newStart, @Param("newEnd") LocalDate newEnd);
 
+	// B-3c(전체 기본 요율 갱신): 겹치는 기존 기본 요율 조회 — 자동 마감 대상 판정용
+	@Query("""
+			select r from CommissionRate r
+			where r.creatorId is null
+			and r.startedAt <= :newEnd and (r.endedAt is null or r.endedAt >= :newStart)
+			""")
+	List<CommissionRate> findOverlappingDefault(@Param("newStart") LocalDate newStart, @Param("newEnd") LocalDate newEnd);
+
 	List<CommissionRate> findByCreatorIdOrderByStartedAtDesc(String creatorId);
 
 	List<CommissionRate> findByCreatorIdIsNullOrderByStartedAtDesc();
